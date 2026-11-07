@@ -1,0 +1,39 @@
+# STEP 4: 手動実行の入力（inputs）・定期実行（schedule）・Secrets/Variables
+name: 04 Manual and Schedule
+
+on:
+  workflow_dispatch:
+    inputs:
+      name:
+        description: あいさつする相手
+        required: true
+        default: world
+      environment:
+        description: 環境
+        type: choice
+        options: [dev, staging, production]
+        default: dev
+  schedule:
+    - cron: '0 0 * * 1'   # 毎週月曜 00:00 UTC（日本時間 09:00）
+
+jobs:
+  greet:
+    runs-on: ubuntu-latest
+    steps:
+      - name: inputs を使う
+        run: |
+          echo "Hello, ${{ inputs.name || 'scheduled run' }}!"
+          echo "環境: ${{ inputs.environment || 'dev' }}"
+
+      - name: Secret を使う（登録していなければ空）
+        env:
+          MY_SECRET: ${{ secrets.MY_SECRET }}
+        run: |
+          if [ -z "$MY_SECRET" ]; then
+            echo "MY_SECRET は未設定です"
+          else
+            echo "MY_SECRET は設定されています（値はログにマスクされます）"
+          fi
+
+      - name: Variable を使う（登録していなければ空）
+        run: echo "MY_VAR = '${{ vars.MY_VAR }}'"

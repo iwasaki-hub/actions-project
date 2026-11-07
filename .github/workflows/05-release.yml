@@ -1,0 +1,28 @@
+# STEP 5: タグを push したら GitHub Release を自動作成
+# 例: git tag v1.0.0 && git push origin v1.0.0
+name: 05 Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+permissions:
+  contents: write   # Release を作るのに必要
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - run: npm test
+      - run: npm run build
+      - name: dist を zip にする
+        run: zip -r release.zip dist/
+      - name: Release を作成
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: gh release create "$GITHUB_REF_NAME" release.zip --generate-notes

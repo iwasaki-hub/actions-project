@@ -1,0 +1,51 @@
+# STEP 3: 複数ジョブの依存関係（needs）・成果物（artifact）・条件分岐（if）
+name: 03 Jobs and Artifacts
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+
+env:
+  APP_NAME: actions-practice   # workflow 全体で使える環境変数
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - run: npm test
+
+  build:
+    needs: test            # test が成功してから実行
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - run: npm run build
+      - name: 成果物をアップロード
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ env.APP_NAME }}-dist
+          path: dist/
+
+  deploy:
+    needs: build
+    if: github.ref == 'refs/heads/main'   # main ブランチのときだけ
+    runs-on: ubuntu-latest
+    steps:
+      - name: 成果物をダウンロード
+        uses: actions/download-artifact@v4
+        with:
+          name: ${{ env.APP_NAME }}-dist
+          path: dist/
+      - name: デプロイのつもり
+        run: |
+          ls -la dist/
+          cat dist/build-info.txt
+          echo "ここで本来はサーバーへデプロイします"

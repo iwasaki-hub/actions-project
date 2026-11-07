@@ -1,0 +1,21 @@
+# STEP 1: 最小の workflow。push と手動実行で動く
+name: 01 Hello Actions
+
+on:
+  push:
+  workflow_dispatch:   # Actions タブの「Run workflow」ボタンで手動実行できる
+
+jobs:
+  hello:
+    runs-on: ubuntu-latest
+    steps:
+      - name: あいさつ
+        run: echo "Hello, GitHub Actions!"
+
+      - name: 実行環境の情報を見る
+        run: |
+          echo "OS:      $RUNNER_OS"
+          echo "Repo:    $GITHUB_REPOSITORY"
+          echo "Branch:  $GITHUB_REF_NAME"
+          echo "Actor:   $GITHUB_ACTOR"
+          echo "Commit:  $GITHUB_SHA"
